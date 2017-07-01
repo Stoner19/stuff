@@ -1,10 +1,13 @@
-# optiminer.py v 0.2 to be used with Python3.5
-# Optimized CPU-miner for Bismuth cryptocurrency
-# Change for dev pool mining capability as well as current Python3.5 based local node
-# Just adjust your config.txt as needed and use with python3.5
+# optipool.py v 0.1 to be used with Python3.5
+# Optimized CPU-miner for Bismuth cryptocurrency dev pool mining only
 # Copyright Hclivess, Primedigger, Maccaspacca 2017
+# .
+# Dev pool Diff is passed as an argument on startup
+# E.g. 'python3 optipool.py 50' would set the diff to 50
+# No variable diff down in this one
 
-import math, base64, sqlite3, os, hashlib, time, socks, keys, log, re, connections, ast
+
+import math, base64, sqlite3, os, hashlib, time, socks, keys, log, re, connections, ast, sys
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 from Crypto import Random
@@ -37,8 +40,6 @@ for line in lines:
         debug_level_conf = line.strip('debug_level=')
     if "pool_address=" in line:
         pool_address = line.strip('pool_address=')
-    if "mining_pool=" in line:
-        pool_conf = int(line.strip('mining_pool='))
 
 # load config
 
@@ -124,6 +125,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
     self_address = address
     address = pool_address
     tries = 0
+    diff = int(sys.argv[1])
 
     while True:
         try:
@@ -136,20 +138,8 @@ def miner(q, privatekey_readable, public_key_hashed, address):
             s.connect(("127.0.0.1", int(port)))  # connect to local node
             connections.send(s, "blocklast", 10)
             db_block_hash = ast.literal_eval(connections.receive(s, 10))[7]
-
-            connections.send(s, "diffget", 10)
-            diff = float(connections.receive(s, 10))
-            diff = int(diff)
-
-            if pool_conf == 0:
-                diff = int(diff)
- 
-            else:  # if pooled
-                diff_req = int(diff)
-
-                diff = 50
-                if diff_req < diff:
-                    diff = diff_req
+            
+            #diff = 50
 
             if tries % debug_print_mod == 0:
                 print('db_block_hash:', db_block_hash, 'diff:', diff)
@@ -192,8 +182,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
                 if mining_condition in mining_hash:
                     if mining_condition_bin in bin_convert(mining_hash):
                         # recheck
-                        mining_hash_check = hashlib.sha224(
-                            (address + try_nonce + db_block_hash).encode("utf-8")).hexdigest()
+                        mining_hash_check = hashlib.sha224((address + try_nonce + db_block_hash).encode("utf-8")).hexdigest()
                         if mining_hash_check != mining_hash or mining_condition_bin not in bin_convert_orig(
                                 mining_hash_check):
                             print("FOUND block, but block hash doesn't match:", mining_hash_check, 'vs.', mining_hash)
@@ -253,62 +242,25 @@ def miner(q, privatekey_readable, public_key_hashed, address):
                         if sync_conf == 1:
                             check_uptodate(300, app_log)
 
-                        if pool_conf == 1:
-                            try:
-                                s = socks.socksocket()
-                                s.settimeout(0.3)
-                                if tor_conf == 1:
-                                    s.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
-                                s.connect((mining_ip_conf, 8525))  # connect to pool
-                                app_log.warning("Connected")
+                        try:
+                            s = socks.socksocket()
+                            s.settimeout(0.3)
+                            if tor_conf == 1:
+                                s.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
+                            s.connect((mining_ip_conf, 8525))  # connect to pool
+                            app_log.warning("Connected")
 
-                                app_log.warning("Miner: Proceeding to submit mined block to pool")
+                            app_log.warning("Miner: Proceeding to submit mined block to pool")
 
-                                connections.send(s, "block", 10)
-                                connections.send(s, self_address, 10)
-                                connections.send(s, block_send, 10)
+                            connections.send(s, "block", 10)
+                            connections.send(s, self_address, 10)
+                            connections.send(s, block_send, 10)
 
-                                app_log.warning("Miner: Block submitted to pool")
+                            app_log.warning("Miner: Block submitted to pool")
 
-                            except Exception as e:
-                                app_log.warning("Miner: Could not submit block to pool")
-                                pass
-
-                        else:
-
-                            # connect to all nodes
-                            global peer_dict
-                            peer_dict = {}
-                            with open("peers.txt") as f:
-                                for line in f:
-                                    line = re.sub("[\)\(\:\\n\'\s]", "", line)
-                                    peer_dict[line.split(",")[0]] = line.split(",")[1]
-
-                                for k, v in peer_dict.items():
-                                    peer_ip = k
-                                    # app_log.info(HOST)
-                                    peer_port = int(v)
-                                    # app_log.info(PORT)
-                                    # connect to all nodes
-
-                                    try:
-                                        s = socks.socksocket()
-                                        s.settimeout(0.3)
-                                        if tor_conf == 1:
-                                            s.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
-                                        s.connect((peer_ip, int(peer_port)))  # connect to node in peerlist
-                                        app_log.warning("Connected")
-
-                                        app_log.warning("Miner: Proceeding to submit mined block")
-
-                                        connections.send(s, "block", 10)
-                                        connections.send(s, block_send, 10)
-
-                                        app_log.warning("Miner: Block submitted to {}".format(peer_ip))
-                                    except Exception as e:
-                                        app_log.warning(
-                                            "Miner: Could not submit block to {} because {}".format(peer_ip, e))
-                                        pass
+                        except Exception as e:
+                            app_log.warning("Miner: Could not submit block to pool")
+                            pass
 
                         # remove sent from mempool
                         mempool = sqlite3.connect("mempool.db")

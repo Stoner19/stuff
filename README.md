@@ -3,6 +3,26 @@ General things
 
 # optiminer.py
 
-optiminer.py v0.1 ported from miner_opt.py v0.1 by Primedigger
+optiminer.py v 0.2 to be used with Python3.5
 
-adjusted to support latest Bismuth client 3.491
+Optimized CPU-miner for Bismuth cryptocurrency
+
+Change for dev pool mining capability as well as current Python3.5 based local node
+
+Just adjust your config.txt as needed and use with python3.5
+
+Copyright Hclivess, Primedigger, Maccaspacca 2017
+
+# optipool.py
+
+optipool.py v 0.1 to be used with Python3.5
+
+Optimized CPU-miner for Bismuth cryptocurrency dev pool mining only
+
+Copyright Hclivess, Primedigger, Maccaspacca 2017
+
+Dev pool Diff is passed as an argument on startup
+
+E.g. 'python3 optipool.py 50' would set the diff to 50
+
+No variable diff down in this one
