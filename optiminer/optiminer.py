@@ -121,15 +121,18 @@ def miner(q, privatekey_readable, public_key_hashed, address):
     key = RSA.importKey(privatekey_readable)
     app_log = log.log("miner_" + q + ".log", debug_level_conf)
     rndfile = Random.new()
-    self_address = address
-    address = pool_address
     tries = 0
+    firstrun = True
+    begin = time.time()
+    if pool_conf == 1:
+        self_address = address
+        address = pool_address
 
     while True:
         try:
             tries = tries + 1
             start_time = time.time()
-            # firstrun = False
+            firstrun = False
             now = time.time()
             block_timestamp = '%.2f' % time.time()
             s = socks.socksocket()
