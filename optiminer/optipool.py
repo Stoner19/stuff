@@ -122,7 +122,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
     key = RSA.importKey(privatekey_readable)
     app_log = log.log("miner_" + q + ".log", debug_level_conf)
     rndfile = Random.new()
-	firstrun = True
+    firstrun = True
     self_address = address
     address = pool_address
     tries = 0
@@ -134,7 +134,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
             start_time = time.time()
             firstrun = False
             now = time.time()
-            block_timestamp = '%.2f' % time.time()
+            block_timestamp = '%.2f' % (time.time() - 10)
             s = socks.socksocket()
             s.connect(("127.0.0.1", int(port)))  # connect to local node
             connections.send(s, "blocklast", 10)
@@ -219,9 +219,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 
                         # claim reward
                         transaction_reward = tuple
-                        transaction_reward = (
-                            str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), "0",
-                            str(try_nonce))  # only this part is signed!
+                        transaction_reward = (str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), "0", str(try_nonce))  # only this part is signed!
                         # print transaction_reward
 
                         h = SHA.new(str(transaction_reward).encode("utf-8"))
@@ -229,10 +227,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
                         signature = signer.sign(h)
                         signature_enc = base64.b64encode(signature)
 
-                        block_send.append((
-                            str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0),
-                            str(signature_enc),
-                            str(public_key_hashed), "0", str(try_nonce)))  # mining reward tx
+                        block_send.append((str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), str(signature_enc.decode("utf-8")), str(public_key_hashed), "0", str(try_nonce)))  # mining reward tx
                         # claim reward
                         # include data
 
