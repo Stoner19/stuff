@@ -39,7 +39,8 @@ for line in lines:
     if "debug_level=" in line:
         debug_level_conf = line.strip('debug_level=')
     if "pool_address=" in line:
-        pool_address = line.strip('pool_address=')
+        pool_address = line.lstrip('pool_address=')
+        print(pool_address)
 
 # load config
 
