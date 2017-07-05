@@ -27,7 +27,7 @@ for line in lines:
     if "port=" in line:
         port = line.strip('port=')
     if "mining_ip=" in line:
-        mining_ip_conf = line.strip("mining_ip=")
+        mining_ip_conf = line.split('=')[1]
     if "mining_threads=" in line:
         mining_threads_conf = line.strip('mining_threads=')
     if "diff_recalc=" in line:
@@ -39,7 +39,7 @@ for line in lines:
     if "debug_level=" in line:
         debug_level_conf = line.strip('debug_level=')
     if "pool_address=" in line:
-        pool_address = line.lstrip('pool_address=')
+        pool_address = line.split('=')[1]
         print(pool_address)
 
 # load config

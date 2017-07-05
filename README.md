@@ -26,3 +26,9 @@ Dev pool Diff is passed as an argument on startup
 E.g. 'python3 optipool.py 50' would set the diff to 50
 
 No variable diff down in this one
+
+# peer_clean.py
+
+Cleans Bismuth peers.txt of duplicates and nodes on same first network octet thus improving geographic spread of peers
+
+Run from command line in Bismuth folder and it will clean your peers.txt
