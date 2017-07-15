@@ -171,7 +171,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 			start_time = time.time()
 			firstrun = False
 			now = time.time()
-			block_timestamp = '%.2f' % (time.time() - 30)
+			block_timestamp = '%.2f' % time.time()
 			s = socks.socksocket()
 			s.connect(("127.0.0.1", int(port)))  # connect to local node
 			connections.send(s, "blocklast", 10)
