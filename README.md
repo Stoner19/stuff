@@ -3,7 +3,7 @@ General things
 
 # optiminer.py
 
-optiminer.py v 0.2 to be used with Python3.5
+optiminer.py v 0.21 to be used with Python3.5
 
 Optimized CPU-miner for Bismuth cryptocurrency
 
@@ -15,7 +15,7 @@ Copyright Hclivess, Primedigger, Maccaspacca 2017
 
 # optipool.py
 
-optipool.py v 0.1 to be used with Python3.5
+optipool.py v 0.11 to be used with Python3.5
 
 Optimized CPU-miner for Bismuth cryptocurrency dev pool mining only
 
