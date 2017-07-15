@@ -279,7 +279,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 							check_uptodate(300, app_log)
 
 						mining_condition = bin_convert(db_block_hash)[0:diff_real]
-						if mining_condition >= mining_hash:
+						if mining_condition in mining_hash:
 							app_log.warning("Miner: Submitting block to all nodes, because it satisfies real difficulty too")
 							nodes_block_submit(block_send, app_log)
 
