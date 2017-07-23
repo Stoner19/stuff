@@ -33,3 +33,14 @@ No variable diff down in this one
 Cleans Bismuth peers.txt of duplicates and nodes on same first network octet thus improving geographic spread of peers
 
 Run from command line in Bismuth folder and it will clean your peers.txt
+
+# optipool.exe
+
+1. Place into Bismuth application folder (C:\Program Files (x86)\Bismuth)
+2. For mining to poolware.py pool only (e.g. main official pool or your own private one) so adjust config.txt
+3. Run from command prompt once node is up to date
+4. Command> optipool.exe 50
+
+Tested on Windows 10
+
+Users on earlier windows versions may need to install https://www.microsoft.com/en-us/download/details.aspx?id=48234
