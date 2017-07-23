@@ -1,4 +1,4 @@
-# optipool.py v 0.11 to be used with Python3.5
+# optipool.py v 0.12 to be used with Python3.5
 # Optimized CPU-miner for Bismuth cryptocurrency dev pool mining only
 # Copyright Hclivess, Primedigger, Maccaspacca 2017
 # .
@@ -41,6 +41,8 @@ for line in lines:
 	if "pool_address=" in line:
 		pool_address = line.split('=')[1]
 		print(pool_address)
+	if "ledger_path=" in line:
+		ledger_path_conf = line.split('=')[1]
 
 # load config
 
@@ -160,10 +162,22 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 	app_log = log.log("miner_" + q + ".log", debug_level_conf)
 	rndfile = Random.new()
 	firstrun = True
+
+	conn = sqlite3.connect(ledger_path_conf)  # open to select the last tx to create a new hash from
+	conn.text_factory = str
+	c = conn.cursor()
+	execute_param(c, ("SELECT public_key FROM transactions WHERE address = ? and reward = 0"), (pool_address,), app_log)
+	public_key_hashed = c.fetchone()[0]
+	conn.close()
+
 	self_address = address
 	address = pool_address
+	
 	tries = 0
-	diff = int(sys.argv[1])
+	try:
+		diff = int(sys.argv[1])
+	except Exception as e:
+		diff = 50
 
 	while True:
 		try:
@@ -263,44 +277,50 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 						signer = PKCS1_v1_5.new(key)
 						signature = signer.sign(h)
 						signature_enc = base64.b64encode(signature)
+						
+						if signer.verify(h, signature) == True:
+							app_log.warning("Signature valid")
 
-						block_send.append((str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), str(signature_enc.decode("utf-8")), str(public_key_hashed), "0", str(try_nonce)))  # mining reward tx
-						# claim reward
-						# include data
+							block_send.append((str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), str(signature_enc.decode("utf-8")), str(public_key_hashed), "0", str(try_nonce)))  # mining reward tx
+							app_log.warning("Block to send: {}".format(block_send))
+							# claim reward
+							# include data
 
-						tries = 0
-						connections.send(s, "diffget", 10)
-						diff_real = float(connections.receive(s, 10))
-						diff_real = int(diff_real)
+							tries = 0
+							connections.send(s, "diffget", 10)
+							diff_real = float(connections.receive(s, 10))
+							diff_real = int(diff_real)
 
-						# submit mined block to node
+							# submit mined block to node
 
-						if sync_conf == 1:
-							check_uptodate(300, app_log)
+							if sync_conf == 1:
+								check_uptodate(300, app_log)
 
-						mining_condition = bin_convert(db_block_hash)[0:diff_real]
-						if mining_condition in mining_hash:
-							app_log.warning("Miner: Submitting block to all nodes, because it satisfies real difficulty too")
-							nodes_block_submit(block_send, app_log)
+							mining_condition = bin_convert(db_block_hash)[0:diff_real]
+							if mining_condition in mining_hash:
+								app_log.warning("Miner: Submitting block to all nodes, because it satisfies real difficulty too")
+								nodes_block_submit(block_send, app_log)
 
-						try:
-							s = socks.socksocket()
-							s.settimeout(0.3)
-							if tor_conf == 1:
-								s.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
-							s.connect((mining_ip_conf, 8525))  # connect to pool
-							app_log.warning("Connected")
+							try:
+								s = socks.socksocket()
+								s.settimeout(0.3)
+								if tor_conf == 1:
+									s.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
+								s.connect((mining_ip_conf, 8525))  # connect to pool
+								app_log.warning("Connected")
 
-							app_log.warning("Miner: Proceeding to submit mined block to pool")
+								app_log.warning("Miner: Proceeding to submit mined block to pool")
 
-							connections.send(s, "block", 10)
-							connections.send(s, self_address, 10)
-							connections.send(s, block_send, 10)
-							app_log.warning("Miner: Block submitted to pool")
+								connections.send(s, "block", 10)
+								connections.send(s, self_address, 10)
+								connections.send(s, block_send, 10)
+								app_log.warning("Miner: Block submitted to pool")
 
-						except Exception as e:
-							app_log.warning("Miner: Could not submit block to pool")
-							pass
+							except Exception as e:
+								app_log.warning("Miner: Could not submit block to pool")
+								pass
+						else:
+							app_log.warning("Invalid signature")
 
 				count += 1
 			stop_time = time.time()
