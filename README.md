@@ -3,7 +3,7 @@ General things
 
 # optiminer.py
 
-optiminer.py v 0.12 to be used with Python3.5
+optiminer.py to be used with Python3.5
 
 Optimized CPU-miner for Bismuth cryptocurrency
 
@@ -15,7 +15,7 @@ Copyright Hclivess, Primedigger, Maccaspacca 2017
 
 # optipool.py
 
-optipool.py v 0.12 to be used with Python3.5
+optipool.py to be used with Python3.5
 
 Optimized CPU-miner for Bismuth cryptocurrency dev pool mining only
 
@@ -28,18 +28,12 @@ E.g. 'python3 optipool.py' would default to diff 50
 
 No variable diff down in this one
 
-# peer_clean.py
-
-Cleans Bismuth peers.txt of duplicates and nodes on same first network octet thus improving geographic spread of peers
-
-Run from command line in Bismuth folder and it will clean your peers.txt
-
 # optipool.exe
 
 1. Place into Bismuth application folder (C:\Program Files (x86)\Bismuth)
 2. For mining to poolware.py pool only (e.g. main official pool or your own private one) so adjust config.txt
 3. Run from command prompt once node is up to date
-4. Command> optipool.exe 50
+4. Command> optipool.exe
 5. Defaults to diff of 50 or you can place as arguement in command
 
 Tested on Windows 10

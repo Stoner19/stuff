@@ -1,4 +1,4 @@
-# optipool.py v 0.12 to be used with Python3.5
+# optipool.py v 0.13 to be used with Python3.5
 # Optimized CPU-miner for Bismuth cryptocurrency dev pool mining only
 # Copyright Hclivess, Primedigger, Maccaspacca 2017
 # .
@@ -163,13 +163,6 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 	rndfile = Random.new()
 	firstrun = True
 
-	conn = sqlite3.connect(ledger_path_conf)  # open to select the last tx to create a new hash from
-	conn.text_factory = str
-	c = conn.cursor()
-	execute_param(c, ("SELECT public_key FROM transactions WHERE address = ? and reward = 0"), (pool_address,), app_log)
-	public_key_hashed = c.fetchone()[0]
-	conn.close()
-
 	self_address = address
 	address = pool_address
 	
@@ -185,7 +178,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 			start_time = time.time()
 			firstrun = False
 			now = time.time()
-			block_timestamp = '%.2f' % time.time()
+			# block_timestamp = '%.2f' % time.time()
 			s = socks.socksocket()
 			s.connect(("127.0.0.1", int(port)))  # connect to local node
 			connections.send(s, "blocklast", 10)
@@ -232,6 +225,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 
 				# we first check hex diff, then binary diff
 				if mining_condition in mining_hash:
+					block_timestamp = '%.2f' % time.time()
 					if mining_condition_bin in bin_convert(mining_hash):
 						# recheck
 						mining_hash_check = hashlib.sha224((address + try_nonce + db_block_hash).encode("utf-8")).hexdigest()

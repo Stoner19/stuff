@@ -1,4 +1,4 @@
-# optiminer.py v 0.12 to be used with Python3.5
+# optiminer.py v 0.13 to be used with Python3.5
 # Optimized CPU-miner for Bismuth cryptocurrency
 # Change for dev pool mining capability as well as current Python3.5 based local node
 # Just adjust your config.txt as needed and use with python3.5
@@ -175,7 +175,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
             start_time = time.time()
             firstrun = False
             now = time.time()
-            block_timestamp = '%.2f' % time.time()
+            #block_timestamp = '%.2f' % time.time()
             s = socks.socksocket()
             s.connect(("127.0.0.1", int(port)))  # connect to local node
             connections.send(s, "blocklast", 10)
@@ -236,6 +236,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 
                 # we first check hex diff, then binary diff
                 if mining_condition in mining_hash:
+                    block_timestamp = '%.2f' % time.time()
                     if mining_condition_bin in bin_convert(mining_hash):
                         # recheck
                         mining_hash_check = hashlib.sha224(
