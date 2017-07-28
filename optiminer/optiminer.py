@@ -303,7 +303,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
                                 app_log.warning("Signature invalid")
                                 valid = 0
 
-                        if valid = 1:
+                        if valid == 1:
                             block_send.append((str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), str(signature_enc.decode("utf-8")), str(public_key_hashed), "0", str(try_nonce)))  # mining reward tx
                             app_log.warning("Block to send: {}".format(block_send))
                             # claim reward
