@@ -165,15 +165,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
     firstrun = True
     begin = time.time()
 
-    if pool_conf == 1:
-        conn = sqlite3.connect(ledger_path_conf)  # open to select the last tx to create a new hash from
-        conn.text_factory = str
-        c = conn.cursor()
-
-        execute_param(c, ("SELECT public_key FROM transactions WHERE address = ? and reward = 0"), (pool_address,), app_log)
-        public_key_hashed = c.fetchone()[0]
-        conn.close()
-
+    if pool_conf == 1:      
         self_address = address
         address = pool_address
 
@@ -283,7 +275,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 
                         # claim reward
                         transaction_reward = tuple
-                        transaction_reward = (str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), "0", str(try_nonce))  # only this part is signed (if solo mining)
+                        transaction_reward = (str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), "0", str(try_nonce))  # only this part is signed!
                         # print transaction_reward
 
                         h = SHA.new(str(transaction_reward).encode("utf-8"))
@@ -291,37 +283,27 @@ def miner(q, privatekey_readable, public_key_hashed, address):
                         signature = signer.sign(h)
                         signature_enc = base64.b64encode(signature)
 
-
-                        valid = 1
                         if signer.verify(h, signature) == True:
                             app_log.warning("Signature valid")
 
-                        else:
-                            if pool_conf == 1:
-                                app_log.warning("Mining for pool, signature check skipped")
-                            else:
-                                app_log.warning("Signature invalid")
-                                valid = 0
-
-                        if valid == 1:
                             block_send.append((str(block_timestamp), str(address[:56]), str(address[:56]), '%.8f' % float(0), str(signature_enc.decode("utf-8")), str(public_key_hashed), "0", str(try_nonce)))  # mining reward tx
                             app_log.warning("Block to send: {}".format(block_send))
                             # claim reward
                             # include data
-    
+
                             tries = 0
-    
+
                             # submit mined block to node
-    
+
                             if sync_conf == 1:
                                 check_uptodate(300, app_log)
-    
+
                             if pool_conf == 1:
                                 mining_condition = bin_convert(db_block_hash)[0:diff_real]
                                 if mining_condition in mining_hash:
                                     app_log.warning("Miner: Submitting block to all nodes, because it satisfies real difficulty too")
                                     nodes_block_submit(block_send, app_log)
-    
+
                                 try:
                                     s = socks.socksocket()
                                     s.settimeout(0.3)
@@ -329,21 +311,23 @@ def miner(q, privatekey_readable, public_key_hashed, address):
                                         s.setproxy(socks.PROXY_TYPE_SOCKS5, "127.0.0.1", 9050)
                                     s.connect((mining_ip_conf, 8525))  # connect to pool
                                     app_log.warning("Connected")
-    
+
                                     app_log.warning("Miner: Proceeding to submit mined block to pool")
-    
+
                                     connections.send(s, "block", 10)
                                     connections.send(s, self_address, 10)
                                     connections.send(s, block_send, 10)
-    
+
                                     app_log.warning("Miner: Block submitted to pool")
-    
+
                                 except Exception as e:
                                     app_log.warning("Miner: Could not submit block to pool")
                                     pass
-    
+
                             if pool_conf == 0:
                                 nodes_block_submit(block_send, app_log)
+                        else:
+                            app_log.warning("Invalid signature")
 
                 count += 1
             stop_time = time.time()
