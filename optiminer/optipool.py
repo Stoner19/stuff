@@ -109,16 +109,36 @@ def send(sdef, data):
 	sdef.sendall(data)
 
 
-bin_format_dict = dict((x, format(ord(x), 'b')) for x in '0123456789abcdef')
+bin_format_dict = dict((x, format(ord(x), '8b').replace(' ', '0')) for x in '0123456789abcdef')
 
 
 def bin_convert(string):
 	return ''.join(bin_format_dict[x] for x in string)
 
-
+	
 def bin_convert_orig(string):
-	return ''.join(format(ord(x), 'b') for x in string)
+    return ''.join(format(ord(x), '8b').replace(' ', '0') for x in string)
 
+def diffme(miner_address,nonce,db_block_hash):
+
+	diff_broke = 0
+	diff = 0
+
+	while diff_broke == 0:
+
+		mining_hash = bin_convert(hashlib.sha224((miner_address + nonce + db_block_hash).encode("utf-8")).hexdigest())
+		mining_condition = bin_convert(db_block_hash)[0:diff]
+		if mining_condition in mining_hash:
+			diff_result = diff
+			diff = diff + 1
+		else:
+			diff_broke = 1
+	try:
+
+		return diff_result
+
+	except:
+		pass
 
 def execute(cursor, what, app_log):
 	# secure execute for slow nodes
@@ -182,7 +202,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 			s = socks.socksocket()
 			s.connect(("127.0.0.1", int(port)))  # connect to local node
 			connections.send(s, "blocklast", 10)
-			db_block_hash = ast.literal_eval(connections.receive(s, 10))[7]
+			db_block_hash = connections.receive(s, 10)[7]
 
 			#diff = 50
 
@@ -309,7 +329,9 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 								connections.send(s, self_address, 10)
 								connections.send(s, block_send, 10)
 								app_log.warning("Miner: Block submitted to pool")
-
+								xdiffx = diffme(str(address[:56]),str(try_nonce),db_block_hash)
+								app_log.warning("Miner: Block Diff = {}".format(str(xdiffx)))
+								
 							except Exception as e:
 								app_log.warning("Miner: Could not submit block to pool")
 								pass

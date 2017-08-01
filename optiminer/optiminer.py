@@ -1,10 +1,10 @@
-# optiminer.py v 0.13 to be used with Python3.5
+# optiminer.py v 0.14 to be used with Python3.5
 # Optimized CPU-miner for Bismuth cryptocurrency
 # Change for dev pool mining capability as well as current Python3.5 based local node
 # Just adjust your config.txt as needed and use with python3.5
 # Copyright Hclivess, Primedigger, Maccaspacca 2017
 
-import math, base64, sqlite3, os, hashlib, time, socks, keys, log, re, connections, ast, options
+import math, base64, sqlite3, os, hashlib, time, socks, keys, log, re, connections, options
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA
 from Crypto import Random
@@ -109,15 +109,15 @@ def send(sdef, data):
     sdef.sendall(data)
 
 
-bin_format_dict = dict((x, format(ord(x), 'b')) for x in '0123456789abcdef')
+bin_format_dict = dict((x, format(ord(x), '8b').replace(' ', '0')) for x in '0123456789abcdef')
 
 
 def bin_convert(string):
-    return ''.join(bin_format_dict[x] for x in string)
+	return ''.join(bin_format_dict[x] for x in string)
 
 
 def bin_convert_orig(string):
-    return ''.join(format(ord(x), 'b') for x in string)
+    return ''.join(format(ord(x), '8b').replace(' ', '0') for x in string)
 
 
 def execute(cursor, what, app_log):
@@ -179,7 +179,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
             s = socks.socksocket()
             s.connect(("127.0.0.1", int(port)))  # connect to local node
             connections.send(s, "blocklast", 10)
-            db_block_hash = ast.literal_eval(connections.receive(s, 10))[7]
+            db_block_hash = connections.receive(s, 10)[7]
 
             connections.send(s, "diffget", 10)
             diff = float(connections.receive(s, 10))
