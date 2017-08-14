@@ -183,7 +183,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
 
             connections.send(s, "diffget", 10)
             diff = float(connections.receive(s, 10))
-            diff = int(diff[0])
+            diff = int(diff[1])
             diff_real = int(diff)
 
             if pool_conf == 0:
