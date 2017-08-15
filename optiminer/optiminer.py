@@ -182,7 +182,7 @@ def miner(q, privatekey_readable, public_key_hashed, address):
             db_block_hash = connections.receive(s, 10)[7]
 
             connections.send(s, "diffget", 10)
-            diff = float(connections.receive(s, 10))
+            diff = (connections.receive(s, 10))
             diff = int(diff[1])
             diff_real = int(diff)
 
