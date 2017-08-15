@@ -26,7 +26,7 @@ lines = [line.rstrip('\n') for line in open('config.txt')]
 for line in lines:
 	if "port=" in line:
 		port = line.strip('port=')
-	if "mining_ip=" in line:
+	if "pool_ip=" in line:
 		mining_ip_conf = line.split('=')[1]
 	if "mining_threads=" in line:
 		mining_threads_conf = line.strip('mining_threads=')
